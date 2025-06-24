@@ -2,75 +2,105 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dominio y Rango de una Función</title>
+  <title>Calculadora de Dominio y Rango</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      margin: 20px;
+      padding: 20px;
     }
     input {
-      padding: 5px;
+      padding: 8px;
+      margin: 5px;
       width: 250px;
+      font-size: 16px;
     }
-    #output {
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    #grafico {
+      margin-top: 30px;
+    }
+    #info {
       margin-top: 20px;
+      font-size: 18px;
       font-weight: bold;
+    }
+    .resaltado {
+      color: darkblue;
     }
   </style>
 </head>
 <body>
-  <h2>Calculadora de Dominio y Rango</h2>
-  <p>Ingresa una función en x (ej: <code>Math.pow(x,2) + 3</code>)</p>
-  <input type="text" id="funcion" value="Math.pow(x,2) + 3">
-  <button onclick="graficarFuncion()">Graficar</button>
+  <h2>🧮 Calculadora de Dominio y Rango</h2>
 
-  <div id="grafico" style="width:100%;max-width:700px;height:400px;margin:auto;"></div>
-  <div id="output"></div>
+  <p>Función (usa <code>x</code>):</p>
+  <input type="text" id="funcion" value="Math.pow(x, 2) + 3">
+
+  <p>Desde a: <input type="number" id="a" value="-10">
+     hasta b: <input type="number" id="b" value="10"></p>
+
+  <button onclick="graficar()">Graficar Función</button>
+
+  <div id="grafico"></div>
+
+  <div id="info"></div>
 
   <script>
-    function graficarFuncion() {
+    function graficar() {
       const expr = document.getElementById("funcion").value;
-      const x = [], y = [];
-      let ymin = Infinity, ymax = -Infinity;
+      const a = parseFloat(document.getElementById("a").value);
+      const b = parseFloat(document.getElementById("b").value);
 
-      for (let i = -20; i <= 20; i += 0.1) {
+      if (isNaN(a) || isNaN(b) || a >= b) {
+        document.getElementById("info").innerHTML = "⚠️ Ingresa valores válidos: a debe ser menor que b.";
+        return;
+      }
+
+      const x_vals = [], y_vals = [];
+      let y_min = Infinity, y_max = -Infinity;
+
+      for (let x = a; x <= b; x += 0.1) {
         try {
-          const xi = i;
-          const yi = eval(expr.replace(/x/g, `(${xi})`));
-          if (!isNaN(yi) && isFinite(yi)) {
-            x.push(xi);
-            y.push(yi);
-            ymin = Math.min(ymin, yi);
-            ymax = Math.max(ymax, yi);
+          const y = eval(expr.replace(/x/g, `(${x})`));
+          if (!isNaN(y) && isFinite(y)) {
+            x_vals.push(x);
+            y_vals.push(y);
+            y_min = Math.min(y_min, y);
+            y_max = Math.max(y_max, y);
           }
         } catch (e) {
-          document.getElementById("output").innerText = "Error en la función.";
+          document.getElementById("info").innerHTML = "⚠️ Error al evaluar la función.";
           return;
         }
       }
 
       const trace = {
-        x: x,
-        y: y,
-        type: 'scatter',
-        mode: 'lines',
-        line: { color: 'blue' }
+        x: x_vals,
+        y: y_vals,
+        type: "scatter",
+        mode: "lines",
+        line: { color: "green" }
       };
 
-      Plotly.newPlot('grafico', [trace], {
-        title: 'Gráfica de la función',
-        xaxis: { title: 'x' },
-        yaxis: { title: 'f(x)' }
-      });
+      const layout = {
+        title: "Gráfica de la Función",
+        xaxis: { title: "x" },
+        yaxis: { title: "f(x)" }
+      };
 
-      document.getElementById("output").innerText =
-        `Dominio: Todos los x reales usados\nRango aproximado: [${ymin.toFixed(2)}, ${ymax.toFixed(2)}]`;
+      Plotly.newPlot("grafico", [trace], layout);
+
+      const dominio = `Dominio: <span class="resaltado">[${a}, ${b}]</span>`;
+      const rango = `Rango aproximado: <span class="resaltado">[${y_min.toFixed(2)}, ${y_max.toFixed(2)}]</span>`;
+
+      document.getElementById("info").innerHTML = dominio + "<br>" + rango;
     }
 
-    window.onload = graficarFuncion;
+    window.onload = graficar;
   </script>
 </body>
 </html>
-
