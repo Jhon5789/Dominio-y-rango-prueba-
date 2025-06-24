@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dominio y Rango de una Función</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    input {
+      padding: 5px;
+      width: 250px;
+    }
+    #output {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>Calculadora de Dominio y Rango</h2>
+  <p>Ingresa una función en x (ej: <code>Math.pow(x,2) + 3</code>)</p>
+  <input type="text" id="funcion" value="Math.pow(x,2) + 3">
+  <button onclick="graficarFuncion()">Graficar</button>
+
+  <div id="grafico" style="width:100%;max-width:700px;height:400px;margin:auto;"></div>
+  <div id="output"></div>
+
+  <script>
+    function graficarFuncion() {
+      const expr = document.getElementById("funcion").value;
+      const x = [], y = [];
+      let ymin = Infinity, ymax = -Infinity;
+
+      for (let i = -20; i <= 20; i += 0.1) {
+        try {
+          const xi = i;
+          const yi = eval(expr.replace(/x/g, `(${xi})`));
+          if (!isNaN(yi) && isFinite(yi)) {
+            x.push(xi);
+            y.push(yi);
+            ymin = Math.min(ymin, yi);
+            ymax = Math.max(ymax, yi);
+          }
+        } catch (e) {
+          document.getElementById("output").innerText = "Error en la función.";
+          return;
+        }
+      }
+
+      const trace = {
+        x: x,
+        y: y,
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: 'blue' }
+      };
+
+      Plotly.newPlot('grafico', [trace], {
+        title: 'Gráfica de la función',
+        xaxis: { title: 'x' },
+        yaxis: { title: 'f(x)' }
+      });
+
+      document.getElementById("output").innerText =
+        `Dominio: Todos los x reales usados\nRango aproximado: [${ymin.toFixed(2)}, ${ymax.toFixed(2)}]`;
+    }
+
+    window.onload = graficarFuncion;
+  </script>
+</body>
+</html>
